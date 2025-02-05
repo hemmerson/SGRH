@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Profissões{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4>Profissões</h4>
+            <a href="{{ url_for('profissoes.cadastrar') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nova Profissão
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Descrição</th>
+                            <th>Salário Base</th>
+                            <th>Data de Início</th>
+                            <th>Pessoa</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for profissao in profissoes %}
+                        <tr>
+                            <td>{{ profissao.id }}</td>
+                            <td>{{ profissao.descricao }}</td>
+                            <td>R$ {{ "%.2f"|format(profissao.salario_base|float) }}</td>
+                            <td>{{ profissao.data_inicio.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ profissao.pessoa.nome }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('profissoes.editar', id=profissao.id) }}" 
+                                       class="btn btn-warning btn-sm" title="Editar">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-danger btn-sm" 
+                                            onclick="confirmarExclusao({{ profissao.id }})" title="Excluir">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">Nenhuma profissão cadastrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="confirmarExclusaoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Tem certeza que deseja excluir esta profissão?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formExcluir" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmarExclusao(id) {
+    const modal = new bootstrap.Modal(document.getElementById('confirmarExclusaoModal'));
+    const form = document.getElementById('formExcluir');
+    form.action = "{{ url_for('profissoes.excluir', id=0) }}".replace('0', id);
+    modal.show();
+}
+</script>
+{% endblock %}

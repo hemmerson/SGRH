@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sistema RH{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4">Dashboard</h1>
+    
+    <!-- Cards de Estatísticas -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Pessoas Cadastradas</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_pessoas }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Profissões</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_profissoes }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-briefcase fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Capacitações</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_capacitacoes }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-mortarboard fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Folhas de Pagamento</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_folhas }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-cash fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área para conteúdo adicional -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Bem-vindo ao Sistema RH</h6>
+                </div>
+                <div class="card-body">
+                    <p>Este é o dashboard principal do sistema. Aqui você pode visualizar as principais estatísticas e acessar todas as funcionalidades do sistema.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
