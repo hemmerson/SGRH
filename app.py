@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template
 from db import db
-from models.models import Usuario, Pessoa, Profissao, Capacitacao, FolhaPagamento
+from models.models import Pessoa, Profissao, Capacitacao, FolhaPagamento
 from routes import blueprints
 
 

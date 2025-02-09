@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar Capacitação' if capacitacao else 'Cadastrar Capacitação' }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ 'Editar Capacitação' if capacitacao else 'Cadastrar Capacitação' }}</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="titulo" class="form-label">Título</label>
+            <input type="text" class="form-control" id="titulo" name="titulo" required value="{{ capacitacao.titulo if capacitacao else '' }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="descricao" class="form-label">Descrição</label>
+            <textarea class="form-control" id="descricao" name="descricao" required>{{ capacitacao.descricao if capacitacao else '' }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="data_inicio" class="form-label">Data de Início</label>
+            <input type="date" class="form-control" id="data_inicio" name="data_inicio" required value="{{ capacitacao.data_inicio if capacitacao else '' }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="data_fim" class="form-label">Data de Conclusão</label>
+            <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ capacitacao.data_fim if capacitacao else '' }}">
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input me-2" id="certificado" name="certificado" checked value="{{ capacitacao.certificado if certificado else "" }}">
+            <label for="certificado" class="form-check-label">Certificado?</label>
+        </div>
+
+        <button type="submit" class="btn btn-success">Salvar</button>
+        <a href="{{ url_for('capacitacao.listar') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

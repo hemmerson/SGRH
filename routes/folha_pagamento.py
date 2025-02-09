@@ -1,69 +1,72 @@
-from flask import render_template, request, redirect, url_for, flash
-from datetime import datetime
-from app import db
-from models.models import FolhaPagamento, Profissao
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from db import db
+from models.models import FolhaPagamento, Pessoa
 from routes import folha_pagamento_bp
 
-@folha_pagamento_bp.route('/folha-pagamento')
+
+# Rota para listar folhas de pagamento
+@folha_pagamento_bp.route('/folhas_pagamento')
 def listar():
     folhas = FolhaPagamento.query.all()
     return render_template('folha_pagamento/listar.html', folhas=folhas)
 
-@folha_pagamento_bp.route('/folha-pagamento/cadastrar', methods=['GET', 'POST'])
+
+# Rota para adicionar uma nova folha de pagamento
+@folha_pagamento_bp.route('/folhas_pagamento/nova', methods=['GET', 'POST'])
 def cadastrar():
-    profissoes = Profissao.query.all()
-    if request.method == 'POST':
-        try:
-            folha = FolhaPagamento(
-                data_pagamento=datetime.strptime(request.form['data_pagamento'], '%Y-%m-%d'),
-                valor_bruto=float(request.form['valor_bruto']),
-                descontos=float(request.form['descontos']),
-                valor_liquido=float(request.form['valor_bruto']) - float(request.form['descontos']),
-                mes_referencia=datetime.strptime(request.form['mes_referencia'], '%Y-%m-%d'),
-                profissao_id=int(request.form['profissao_id'])
-            )
-            db.session.add(folha)
-            db.session.commit()
-            flash('Folha de pagamento cadastrada com sucesso!', 'success')
-            return redirect(url_for('folha_pagamento.listar'))
-        except Exception as e:
-            flash('Erro ao cadastrar folha de pagamento.', 'danger')
-            db.session.rollback()
-
-    return render_template('folha_pagamento/form.html', profissoes=profissoes)
-
-@folha_pagamento_bp.route('/folha-pagamento/editar/<int:id>', methods=['GET', 'POST'])
-def editar(id):
-    profissoes = Profissao.query.all()
-    folha = FolhaPagamento.query.get_or_404(id)
+    pessoas = Pessoa.query.all()
 
     if request.method == 'POST':
-        try:
-            folha.data_pagamento = datetime.strptime(request.form['data_pagamento'], '%Y-%m-%d')
-            folha.valor_bruto = float(request.form['valor_bruto'])
-            folha.descontos = float(request.form['descontos'])
-            folha.valor_liquido = float(request.form['valor_bruto']) - float(request.form['descontos'])
-            folha.mes_referencia = datetime.strptime(request.form['mes_referencia'], '%Y-%m-%d')
-            folha.profissao_id = int(request.form['profissao_id'])
+        data_pagamento = request.form['data_pagamento']
+        valor_bruto = request.form['valor_bruto']
+        descontos = request.form['descontos']
+        valor_liquido = float(valor_bruto) - float(descontos)
+        mes_referencia = request.form['mes_referencia']
 
-            db.session.commit()
-            flash('Folha de pagamento atualizada com sucesso!', 'success')
-            return redirect(url_for('folha_pagamento.listar'))
-        except Exception as e:
-            flash('Erro ao atualizar folha de pagamento.', 'danger')
-            db.session.rollback()
+        if not data_pagamento or not valor_bruto or not descontos or not mes_referencia:
+            flash("Todos os campos obrigatórios devem ser preenchidos!", "danger")
+            return redirect(url_for('folha_pagamento.adicionar_folha_pagamento'))
 
-    return render_template('folha_pagamento/form.html', folha=folha, profissoes=profissoes)
+        nova_folha = FolhaPagamento(
+            data_pagamento=data_pagamento,
+            valor_bruto=valor_bruto,
+            descontos=descontos,
+            valor_liquido=valor_liquido,
+            mes_referencia=mes_referencia
+        )
 
-@folha_pagamento_bp.route('/folha-pagamento/excluir/<int:id>', methods=['POST'])
-def excluir(id):
-    folha = FolhaPagamento.query.get_or_404(id)
-    try:
-        db.session.delete(folha)
+        db.session.add(nova_folha)
         db.session.commit()
-        flash('Folha de pagamento excluída com sucesso!', 'success')
-    except Exception as e:
-        flash('Erro ao excluir folha de pagamento.', 'danger')
-        db.session.rollback()
+        flash("Folha de pagamento adicionada com sucesso!", "success")
+        return redirect(url_for('folha_pagamento.listar_folhas_pagamento'))
 
-    return redirect(url_for('folha_pagamento.listar'))
+    return render_template('folha_pagamento/form.html', pessoas=pessoas)
+
+
+# Rota para editar uma folha de pagamento
+@folha_pagamento_bp.route('/folhas_pagamento/editar/<int:id>', methods=['GET', 'POST'])
+def editar(id):
+    folha = FolhaPagamento.query.get_or_404(id)
+
+    if request.method == 'POST':
+        folha.data_pagamento = request.form['data_pagamento']
+        folha.valor_bruto = request.form['valor_bruto']
+        folha.descontos = request.form['descontos']
+        folha.valor_liquido = float(folha.valor_bruto) - float(folha.descontos)
+        folha.mes_referencia = request.form['mes_referencia']
+
+        db.session.commit()
+        flash("Folha de pagamento atualizada com sucesso!", "success")
+        return redirect(url_for('folha_pagamento.listar_folhas_pagamento'))
+
+    return render_template('folha_pagamento/form.html', folha=folha)
+
+
+# Rota para deletar uma folha de pagamento
+@folha_pagamento_bp.route('/folhas_pagamento/deletar/<int:id>', methods=['POST'])
+def deletar(id):
+    folha = FolhaPagamento.query.get_or_404(id)
+    db.session.delete(folha)
+    db.session.commit()
+    flash("Folha de pagamento removida com sucesso!", "success")
+    return redirect(url_for('folha_pagamento.listar_folhas_pagamento'))
