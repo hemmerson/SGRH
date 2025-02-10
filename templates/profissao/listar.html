@@ -1,41 +1,62 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Profissões</title>
-</head>
-<body>
-    <h2>Lista de Profissões</h2>
+{% extends "base.html" %}
 
-    <a href="{{ url_for('profissao.cadastrar') }}">Adicionar Nova Profissão</a>
+{% block title %}Lista de Profissões{% endblock %}
 
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Descrição</th>
-                <th>Salário Base</th>
-                <th>Data de Início</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for profissao in profissoes %}
-            <tr>
-                <td>{{ profissao.id }}</td>
-                <td>{{ profissao.descricao }}</td>
-                <td>R$ {{ "%.2f"|format(profissao.salario_base) }}</td>
-                <td>{{ profissao.data_inicio.strftime('%d/%m/%Y') }}</td>
-                <td>
-                    <a href="{{ url_for('profissao.editar', id=profissao.id) }}">Editar</a>
-                    <form action="{{ url_for('profissao.deletar', id=profissao.id) }}" method="POST" style="display:inline;">
-                        <button type="submit" onclick="return confirm('Tem certeza que deseja deletar esta profissão?')">Deletar</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+{% block content %}
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Lista de Profissões</h2>
+            <a href="{{ url_for('profissao.cadastrar') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nova Profissão
+            </a>
+        </div>
+
+        {% if profissoes %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th>Nome do cargo</th>
+                        <th>Descrição</th>
+                        <th>Salário Base</th>
+                        <th>Departamento</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for profissao in profissoes %}
+                        <tr>
+                            <td>{{ profissao.nome_cargo }}</td>
+                            <td>{{ profissao.descricao }}</td>
+                            <td>R$ {{ "%.2f"|format(profissao.salario_base|float)|replace(".", ",") }}</td>
+                            <td>{{ profissao.departamento.nome }}</td>
+                            <td>
+                                <a href="{{ url_for('profissao.editar', id=profissao.id) }}"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="{{ url_for('profissao.excluir', id=profissao.id) }}"
+                                      method="POST"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Tem certeza que deseja excluir esta profissão?');">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                            title="Excluir">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Nenhuma profissão cadastrada ainda.
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

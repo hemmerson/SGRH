@@ -25,37 +25,12 @@
         </div>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('index') }}">
+                <a class="nav-link" href="{{ url_for('dashboard') }}">
                     <i class="bi bi-house"></i>
                     <span class="menu-text">Dashboard</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
-                   href="#pessoasSubmenu">
-                    <div class="menu-wrapper">
-                        <i class="bi bi-people"></i>
-                        <span class="menu-text">Pessoas</span>
-                    </div>
-                    <i class="bi bi-chevron-down"></i>
-                </a>
-                <div class="collapse" id="pessoasSubmenu">
-                    <ul class="nav flex-column ms-3">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('pessoas.cadastrar') }}">
-                                <i class="bi bi-plus-circle"></i>
-                                <span class="menu-text">Cadastrar</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('pessoas.listar') }}">
-                                <i class="bi bi-list"></i>
-                                <span class="menu-text">Listar</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+
             <li class="nav-item">
                 <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
                    href="#departamentosSubmenu">
@@ -82,6 +57,7 @@
                     </ul>
                 </div>
             </li>
+
             <li class="nav-item">
                 <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
                    href="#profissoesSubmenu">
@@ -104,6 +80,34 @@
                     </ul>
                 </div>
             </li>
+
+            <li class="nav-item">
+                <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
+                   href="#pessoasSubmenu">
+                    <div class="menu-wrapper">
+                        <i class="bi bi-people"></i>
+                        <span class="menu-text">Pessoas</span>
+                    </div>
+                    <i class="bi bi-chevron-down"></i>
+                </a>
+                <div class="collapse" id="pessoasSubmenu">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('pessoas.cadastrar') }}">
+                                <i class="bi bi-plus-circle"></i>
+                                <span class="menu-text">Cadastrar</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('pessoas.listar') }}">
+                                <i class="bi bi-list"></i>
+                                <span class="menu-text">Listar</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
             <li class="nav-item">
                 <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
                    href="#pagamentosSubmenu">
@@ -138,10 +142,12 @@
                 <div class="collapse" id="capacitacoesSubmenu">
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('capacitacao.cadastrar') }}"><i class="bi bi-plus-circle"></i> Cadastrar</a>
+                            <a class="nav-link" href="{{ url_for('capacitacao.cadastrar') }}"><i
+                                    class="bi bi-plus-circle"></i> Cadastrar</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('capacitacao.listar') }}"><i class="bi bi-list"></i> Listar</a>
+                            <a class="nav-link" href="{{ url_for('capacitacao.listar') }}"><i class="bi bi-list"></i>
+                                Listar</a>
                         </li>
                     </ul>
                 </div>

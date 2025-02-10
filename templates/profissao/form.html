@@ -3,26 +3,43 @@
 {% block title %}{{ 'Editar Profissão' if profissao else 'Cadastrar Profissão' }}{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>{{ 'Editar Profissão' if profissao else 'Cadastrar Profissão' }}</h2>
-    <form method="POST">
-        <div class="mb-3">
-            <label for="descricao" class="form-label">Descrição</label>
-            <input type="text" class="form-control" id="descricao" name="descricao" required value="{{ profissao.descricao if profissao else '' }}">
-        </div>
+    <div class="container">
+        <h2>{{ 'Editar Profissão' if profissao else 'Cadastrar Profissão' }}</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="nome_cargo" class="form-label">Cargo</label>
+                <input type="text" class="form-control" id="nome_cargo" name="nome_cargo" required
+                       value="{{ profissao.nome_cargo if profissao else '' }}">
+            </div>
 
-        <div class="mb-3">
-            <label for="salario_base" class="form-label">Salário Base</label>
-            <input type="number" step="0.01" class="form-control" id="salario_base" name="salario_base" required value="{{ profissao.salario_base if profissao else '' }}">
-        </div>
+            <div class="mb-3">
+                <label for="descricao" class="form-label">Descrição do Cargo</label>
+                <input type="text" class="form-control" id="descricao" name="descricao" required
+                       value="{{ profissao.descricao if profissao else '' }}">
+            </div>
 
-        <div class="mb-3">
-            <label for="data_inicio" class="form-label">Data de Início</label>
-            <input type="date" class="form-control" id="data_inicio" name="data_inicio" required value="{{ profissao.data_inicio if profissao else '' }}">
-        </div>
+            <div class="mb-3">
+                <label for="salario_base" class="form-label">Salário Base</label>
+                <input type="number" step="0.01" class="form-control" id="salario_base" name="salario_base" required
+                       value="{{ profissao.salario_base if profissao else '' }}">
+            </div>
 
-        <button type="submit" class="btn btn-success">Salvar</button>
-        <a href="{{ url_for('profissao.listar') }}" class="btn btn-secondary">Cancelar</a>
-    </form>
-</div>
+
+            <div class="mb-3">
+                <label for="departamento_id" class="form-label">Departamento</label>
+                <select class="form-select" id="departamento_id" name="departamento_id" required>
+                    <option value="">Selecione um Departamento</option>
+                    {% for departamento in departamentos %}
+                        <option value="{{ departamento.id }}"
+                                {% if profissao and profissao.departamento_id == departamento.id %}selected{% endif %}>
+                            {{ departamento.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success">Salvar</button>
+            <a href="{{ url_for('profissao.listar') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
 {% endblock %}

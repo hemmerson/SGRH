@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const toggleBtn = document.querySelector('.toggle-sidebar');
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
@@ -45,14 +45,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Adicionar evento de clique ao botão toggle
-    toggleBtn.addEventListener('click', function(e) {
+    toggleBtn.addEventListener('click', function (e) {
         e.preventDefault();
         toggleSidebar();
     });
 
     // Adicionar eventos aos itens do menu
     menuItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             // Se o item clicado tem submenu (collapse)
             if (this.getAttribute('data-bs-toggle') === 'collapse') {
                 e.preventDefault(); // Previne o comportamento padrão
@@ -96,4 +96,16 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', checkScreenSize);
     // Verificar tamanho inicial da tela
     checkScreenSize();
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function (alert) {
+            if (alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+        });
+    }, 5000);
 });

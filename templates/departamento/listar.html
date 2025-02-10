@@ -3,40 +3,49 @@
 {% block title %}Lista de Departamentos{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Lista de Departamentos</h2>
-        <a href="{{ url_for('departamento.cadastrar') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Novo Departamento
-        </a>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Lista de Departamentos</h2>
+            <a href="{{ url_for('departamento.cadastrar') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Novo Departamento
+            </a>
+        </div>
+
+        {% if departamentos %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for departamento in departamentos %}
+                        <tr>
+                            <td>{{ departamento.nome }}</td>
+                            <td>
+                                <a href="{{ url_for('departamento.editar', id=departamento.id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="{{ url_for('departamento.excluir', id=departamento.id) }}" method="POST"
+                                      class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Nenhum departamento cadastrado ainda.
+            </div>
+        {% endif %}
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for departamento in departamentos %}
-                <tr>
-                    <td>{{ departamento.nome }}</td>
-                    <td>
-                        <a href="{{ url_for('departamento.editar', id=departamento.id) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                        <form action="{{ url_for('departamento.excluir', id=departamento.id) }}" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
 {% endblock %}

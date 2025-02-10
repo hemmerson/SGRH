@@ -1,3 +1,7 @@
+import re
+
+from sqlalchemy.orm import validates
+
 from db import db
 
 # Tabela de associação para o relacionamento N-N entre Pessoa e FolhaPagamento
@@ -40,7 +44,7 @@ class Departamento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
 
-    profissoes = db.relationship('Profissao', backref='departamentos', lazy=True)
+    profissoes = db.relationship('Profissao', backref='departamento', lazy=True)
 
 
 class Profissao(db.Model):
@@ -50,7 +54,6 @@ class Profissao(db.Model):
     nome_cargo = db.Column(db.String(100), nullable=False)
     descricao = db.Column(db.String(100), nullable=False)
     salario_base = db.Column(db.Numeric(10, 2), nullable=False)
-    departamento = db.Column(db.String(100), nullable=False)
 
     departamento_id = db.Column(db.Integer, db.ForeignKey('departamento.id'), nullable=False)
 
@@ -72,6 +75,13 @@ class FolhaPagamento(db.Model):
     def __repr__(self):
         return f'<FolhaPagamento {self.mes_referencia}>'
 
+    @validates('mes_referencia')
+    def validate_mes_referencia(self, key, value):
+        # Validação do formato MM/YYYY
+        if not re.match(r'^\d{2}/\d{4}$', value):
+            raise ValueError("Formato inválido para mês de referência. Use MM/YYYY")
+        return value
+
 
 class Capacitacao(db.Model):
     __tablename__ = 'capacitacao'
@@ -88,6 +98,12 @@ class Capacitacao(db.Model):
 
     def __repr__(self):
         return f'<Capacitacao {self.descricao}>'
+
+    @validates('data_fim')
+    def validate_data_fim(self, key, data_fim):
+        if data_fim and data_fim < self.data_inicio:
+            raise ValueError("Data de fim deve ser posterior à data de início")
+        return data_fim
 
 
 class Usuario(db.Model):
