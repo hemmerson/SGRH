@@ -44,9 +44,7 @@
                             id="{{ campo.nome }}"
                             name="{{ campo.nome }}"
                             {% if campo.required %}required{% endif %}>
-                        {% if not campo.required %}
                             <option value="">Selecione...</option>
-                        {% endif %}
                         {% for opcao in campo.opcoes %}
                             <option value="{{ opcao.value }}"
                                     {% if registro and registro[campo.nome] == opcao.value %}selected{% endif %}>
