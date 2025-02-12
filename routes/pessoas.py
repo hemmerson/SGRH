@@ -2,6 +2,8 @@ from flask import render_template, request, redirect, url_for, flash
 from app import db
 from models.models import Pessoa, Profissao
 from routes import bp_pessoa
+from utils import process_form_data
+
 
 @bp_pessoa.route('/pessoas')
 def listar():
@@ -34,49 +36,43 @@ def listar():
 
 @bp_pessoa.route('/cadastrar', methods=['GET', 'POST'])
 def cadastrar():
-    profissoes = Profissao.query.all()
+    config = get_pessoa_form_config()
 
     if request.method == 'POST':
-        nome = request.form['nome']
-        data_nascimento = request.form['data_nascimento']
-        endereco = request.form['endereco']
-        telefone = request.form['telefone']
-        email = request.form['email']
-        profissao_id = request.form['profissao_id']
+        dados = process_form_data(request.form, config['campos'])
 
-        nova_pessoa = Pessoa(
-            nome=nome,
-            data_nascimento=data_nascimento,
-            endereco=endereco,
-            telefone=telefone,
-            email=email,
-            profissao_id=profissao_id
-        )
-        db.session.add(nova_pessoa)
-        db.session.commit()
-        flash('Pessoa cadastrada com sucesso!', 'success')
-        return redirect(url_for('pessoas.listar'))
+        try:
+            nova_pessoa = Pessoa(**dados)
+            db.session.add(nova_pessoa)
+            db.session.commit()
+            flash('Pessoa cadastrada com sucesso!', 'success')
+            return redirect(url_for('pessoas.listar'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Erro ao cadastrar a Pessoa. Por favor tente novamente', 'danger')
 
-    return render_template('pessoa/form.html', profissoes=profissoes)
+    return render_template('components/generic_form.html', **config)
 
 @bp_pessoa.route('/editar/<int:id>', methods=['GET', 'POST'])
 def editar(id):
     pessoa = Pessoa.query.get_or_404(id)
-    profissoes = Profissao.query.all()
+    config = get_pessoa_form_config(pessoa)
 
     if request.method == 'POST':
-        pessoa.nome = request.form['nome']
-        pessoa.data_nascimento = request.form['data_nascimento']
-        pessoa.endereco = request.form['endereco']
-        pessoa.telefone = request.form['telefone']
-        pessoa.email = request.form['email']
-        pessoa.profissao_id = request.form['profissao_id']
+        dados = process_form_data(request.form, config['campos'])
 
-        db.session.commit()
-        flash('Pessoa atualizada com sucesso!', 'success')
-        return redirect(url_for('pessoas.listar'))
+        try:
+            for key, value in dados.items():
+                setattr(pessoa, key, value)
 
-    return render_template('pessoa/form.html', pessoa=pessoa, profissoes=profissoes)
+            db.session.commit()
+            flash('Pessoa atualizada com sucesso!', 'success')
+            return redirect(url_for('pessoas.listar'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Erro ao editar a Pessoa. Por favor tente novamente.', 'danger')
+
+    return render_template('components/generic_form.html', **config)
 
 @bp_pessoa.route('/excluir/<int:id>', methods=['POST'])
 def excluir(id):
@@ -85,3 +81,60 @@ def excluir(id):
     db.session.commit()
     flash('Pessoa excluída com sucesso!', 'danger')
     return redirect(url_for('pessoas.listar'))
+
+
+def get_pessoa_form_config(pessoa=None):
+    return {
+        'titulo': 'Pessoa',
+        'registro': pessoa,
+        'voltar_url': url_for('pessoas.listar'),
+        'campos': [
+            {
+                'tipo': 'text',
+                'nome': 'nome',
+                'label': 'Nome Completo',
+                'required': True
+            },
+            {
+                'tipo': 'date',
+                'nome': 'data_nascimento',
+                'label': 'Data de Nascimento',
+                'required': True
+            },
+            {
+                'tipo': 'textarea',
+                'nome': 'endereco',
+                'label': 'Endereço',
+                'required': True
+            },
+            {
+                'tipo': 'text',
+                'nome': 'telefone',
+                'label': 'Telefone',
+                'required': True,
+                'help_text': 'Digite apenas números'
+            },
+            {
+                'tipo': 'email',
+                'nome': 'email',
+                'label': 'E-mail',
+                'required': True
+            },
+            {
+                'tipo': 'date',
+                'nome': 'data_admissao',
+                'label': 'Data de Admissão',
+                'required': True
+            },
+            {
+                'tipo': 'select',
+                'nome': 'profissao_id',
+                'label': 'Cargo',
+                'required': True,
+                'opcoes': [
+                    {'value': p.id, 'label': p.nome_cargo}
+                    for p in Profissao.query.all()
+                ]
+            }
+        ]
+    }
