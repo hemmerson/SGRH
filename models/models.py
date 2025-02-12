@@ -87,6 +87,7 @@ class Capacitacao(db.Model):
     __tablename__ = 'capacitacao'
 
     id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(100), nullable=False)
     descricao = db.Column(db.String(200), nullable=False)
     instituicao = db.Column(db.String(100), nullable=False)
     data_inicio = db.Column(db.Date, nullable=False)
@@ -97,7 +98,7 @@ class Capacitacao(db.Model):
     pessoa_id = db.Column(db.Integer, db.ForeignKey('pessoa.id'), nullable=False)
 
     def __repr__(self):
-        return f'<Capacitacao {self.descricao}>'
+        return f'<Capacitacao {self.titulo}>'
 
     @validates('data_fim')
     def validate_data_fim(self, key, data_fim):
