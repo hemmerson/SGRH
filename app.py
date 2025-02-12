@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template
 from db import db
-from models.models import Pessoa, Profissao, Capacitacao, FolhaPagamento
+from models.models import Pessoa, Profissao, Capacitacao, FolhaPagamento, Departamento
 from routes import blueprints
 
 
@@ -26,6 +26,7 @@ def create_app():
     @app.route('/dashboard')
     def dashboard():
         stats = {
+            'total_departamentos': Departamento.query.count(),
             'total_pessoas': Pessoa.query.count(),
             'total_profissoes': Profissao.query.count(),
             'total_capacitacoes': Capacitacao.query.count(),
