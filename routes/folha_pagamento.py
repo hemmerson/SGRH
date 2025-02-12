@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash
 from db import db
 from models.models import FolhaPagamento, Pessoa
 from routes import folha_pagamento_bp
-
+from utils import process_form_data
 
 @folha_pagamento_bp.route('/folhas-pagamento')
 def listar():
@@ -17,80 +17,163 @@ def listar():
         'mensagem_confirmacao': 'Tem certeza que deseja excluir esta folha de pagamento?',
         'mensagem_lista_vazia': 'Nenhuma folha de pagamento cadastrada ainda.',
         'colunas': [
+            {
+                'campo': 'pessoas',
+                'label': 'Pessoa',
+                'formato': 'lista',
+                'campo_lista': 'nome'
+            },
             {'campo': 'mes_referencia', 'label': 'Mês/Ano'},
-            {'campo': 'data_pagamento', 'label': 'Data de Pagamento', 'formato': 'data'},
+            {'campo': 'data_pagamento', 'label': 'Data Pagamento', 'formato': 'data'},
             {'campo': 'salario_bruto', 'label': 'Salário Bruto', 'formato': 'moeda'},
             {'campo': 'descontos', 'label': 'Descontos', 'formato': 'moeda'},
             {'campo': 'beneficios', 'label': 'Benefícios', 'formato': 'moeda'},
-            {'campo': 'salario_liquido', 'label': 'Salário Líquido', 'formato': 'moeda'},
-            {
-                'campo': 'pessoas',
-                'label': 'Funcionários',
-                'formato': 'custom',
-                'custom_value': lambda obj: len(obj.pessoas)
-            }
+            {'campo': 'salario_liquido', 'label': 'Salário Líquido', 'formato': 'moeda'}
         ],
         'acoes': True
     }
     return render_template('components/generic_list.html', **config)
 
-
-# Rota para adicionar uma nova folha de pagamento
-@folha_pagamento_bp.route('/folhas_pagamento/nova', methods=['GET', 'POST'])
+@folha_pagamento_bp.route('/folhas/nova', methods=['GET', 'POST'])
 def cadastrar():
-    pessoas = Pessoa.query.all()
+    config = get_folha_pagamento_form_config()
 
     if request.method == 'POST':
-        data_pagamento = request.form['data_pagamento']
-        valor_bruto = request.form['valor_bruto']
-        descontos = request.form['descontos']
-        valor_liquido = float(valor_bruto) - float(descontos)
-        mes_referencia = request.form['mes_referencia']
+        dados = process_form_data(request.form, config['campos'])
+        try:
+            # Remove pessoa_id dos dados pois não é uma coluna direta
+            pessoa_id = dados.pop('pessoa_id')
+            pessoa = Pessoa.query.get(pessoa_id)
 
-        if not data_pagamento or not valor_bruto or not descontos or not mes_referencia:
-            flash("Todos os campos obrigatórios devem ser preenchidos!", "danger")
-            return redirect(url_for('folha_pagamento.adicionar_folha_pagamento'))
+            if not pessoa:
+                raise ValueError("Pessoa não encontrada")
 
-        nova_folha = FolhaPagamento(
-            data_pagamento=data_pagamento,
-            valor_bruto=valor_bruto,
-            descontos=descontos,
-            valor_liquido=valor_liquido,
-            mes_referencia=mes_referencia
-        )
+            nova_folha = FolhaPagamento(**dados)
+            # Adiciona a pessoa à folha de pagamento
+            nova_folha.pessoas.append(pessoa)
 
-        db.session.add(nova_folha)
-        db.session.commit()
-        flash("Folha de pagamento adicionada com sucesso!", "success")
-        return redirect(url_for('folha_pagamento.listar_folhas_pagamento'))
+            db.session.add(nova_folha)
+            db.session.commit()
+            flash('Folha de pagamento criada com sucesso!', 'success')
+            return redirect(url_for('folha_pagamento.listar'))
+        except ValueError as e:
+            flash(str(e), 'danger')
+        except Exception as e:
+            db.session.rollback()
+            flash('Erro ao cadastrar folha de pagamento. Por favor tente novamente.', 'danger')
 
-    return render_template('folha_pagamento/form.html', pessoas=pessoas)
+    return render_template('components/generic_form.html', **config)
 
 
-# Rota para editar uma folha de pagamento
-@folha_pagamento_bp.route('/folhas_pagamento/editar/<int:id>', methods=['GET', 'POST'])
+@folha_pagamento_bp.route('/folhas/editar/<int:id>', methods=['GET', 'POST'])
 def editar(id):
     folha = FolhaPagamento.query.get_or_404(id)
+    config = get_folha_pagamento_form_config(folha)
 
     if request.method == 'POST':
-        folha.data_pagamento = request.form['data_pagamento']
-        folha.valor_bruto = request.form['valor_bruto']
-        folha.descontos = request.form['descontos']
-        folha.valor_liquido = float(folha.valor_bruto) - float(folha.descontos)
-        folha.mes_referencia = request.form['mes_referencia']
+        dados = process_form_data(request.form, config['campos'])
+        try:
+            # Remove e atualiza relacionamento com pessoa
+            pessoa_id = dados.pop('pessoa_id')
+            pessoa = Pessoa.query.get(pessoa_id)
 
-        db.session.commit()
-        flash("Folha de pagamento atualizada com sucesso!", "success")
-        return redirect(url_for('folha_pagamento.listar_folhas_pagamento'))
+            if not pessoa:
+                raise ValueError("Pessoa não encontrada")
 
-    return render_template('folha_pagamento/form.html', folha=folha)
+            # Limpa relacionamentos existentes e adiciona o novo
+            folha.pessoas.clear()
+            folha.pessoas.append(pessoa)
 
+            # Atualiza demais campos
+            for key, value in dados.items():
+                setattr(folha, key, value)
 
-# Rota para deletar uma folha de pagamento
-@folha_pagamento_bp.route('/folhas_pagamento/deletar/<int:id>', methods=['POST'])
+            db.session.commit()
+            flash("Folha de pagamento atualizada com sucesso!", "success")
+            return redirect(url_for('folha_pagamento.listar'))
+        except ValueError as e:
+            flash(str(e), "danger")
+        except Exception as e:
+            db.session.rollback()
+            flash("Erro ao atualizar folha de pagamento. Por favor, tente novamente.", "danger")
+
+    return render_template('components/generic_form.html', **config)
+
+@folha_pagamento_bp.route('/folhas/deletar/<int:id>', methods=['POST'])
 def excluir(id):
     folha = FolhaPagamento.query.get_or_404(id)
-    db.session.delete(folha)
-    db.session.commit()
-    flash("Folha de pagamento removida com sucesso!", "success")
-    return redirect(url_for('folha_pagamento.listar_folhas_pagamento'))
+    try:
+        db.session.delete(folha)
+        db.session.commit()
+        flash("Folha de pagamento removida com sucesso!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Erro ao remover folha de pagamento.", "danger")
+
+    return redirect(url_for('folha_pagamento.listar'))
+
+def get_folha_pagamento_form_config(folha=None):
+    return {
+        'titulo': 'Folha de Pagamento',
+        'registro': folha,
+        'voltar_url': url_for('folha_pagamento.listar'),
+        'campos': [
+            {
+                'tipo': 'select',
+                'nome': 'pessoa_id',
+                'label': 'Pessoa',
+                'required': True,
+                'opcoes': [
+                    {'value': p.id, 'label': p.nome}
+                    for p in Pessoa.query.all()
+                ]
+            },
+            {
+                'tipo': 'text',
+                'nome': 'mes_referencia',
+                'label': 'Mês/Ano Referência (MM/YYYY)',
+                'required': True,
+                'help_text': 'Formato: MM/YYYY (ex: 02/2024)'
+            },
+            {
+                'tipo': 'date',
+                'nome': 'data_pagamento',
+                'label': 'Data de Pagamento',
+                'required': True
+            },
+            {
+                'tipo': 'number',
+                'nome': 'salario_bruto',
+                'label': 'Salário Bruto',
+                'required': True,
+                'step': '0.01',
+                'min': '0'
+            },
+            {
+                'tipo': 'number',
+                'nome': 'descontos',
+                'label': 'Descontos',
+                'required': True,
+                'step': '0.01',
+                'min': '0',
+                'valor_padrao': '0.00'
+            },
+            {
+                'tipo': 'number',
+                'nome': 'beneficios',
+                'label': 'Benefícios',
+                'required': True,
+                'step': '0.01',
+                'min': '0',
+                'valor_padrao': '0.00'
+            },
+            {
+                'tipo': 'number',
+                'nome': 'salario_liquido',
+                'label': 'Salário Líquido',
+                'required': True,
+                'step': '0.01',
+                'min': '0'
+            }
+        ]
+    }
