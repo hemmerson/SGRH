@@ -8,7 +8,29 @@ from routes import profissao_bp
 @profissao_bp.route('/profissoes')
 def listar():
     profissoes = Profissao.query.all()
-    return render_template('profissao/listar.html', profissoes=profissoes)
+    config = {
+        'title': 'Lista de Profissões',
+        'registros': profissoes,
+        'novo_registro_url': url_for('profissao.cadastrar'),
+        'novo_registro_texto': 'Nova Profissão',
+        'editar_url': url_for('profissao.editar', id=0)[:-1] + '%s',  # Remove o 0 e adiciona %s para formatação
+        'excluir_url': url_for('profissao.excluir', id=0)[:-1] + '%s',
+        'mensagem_confirmacao': 'Tem certeza que deseja excluir esta profissão?',
+        'mensagem_lista_vazia': 'Nenhuma profissão cadastrada ainda.',
+        'colunas': [
+            {'campo': 'nome_cargo', 'label': 'Nome do cargo'},
+            {'campo': 'descricao', 'label': 'Descrição'},
+            {'campo': 'salario_base', 'label': 'Salário Base', 'formato': 'moeda'},
+            {
+                'campo': 'departamento',
+                'label': 'Departamento',
+                'formato': 'relacionamento',
+                'campo_relacionamento': 'nome'
+            }
+        ],
+        'acoes': True
+    }
+    return render_template('components/generic_list.html', **config)
 
 
 @profissao_bp.route('/profissoes/nova', methods=['GET', 'POST'])

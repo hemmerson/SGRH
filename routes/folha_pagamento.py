@@ -4,11 +4,35 @@ from models.models import FolhaPagamento, Pessoa
 from routes import folha_pagamento_bp
 
 
-# Rota para listar folhas de pagamento
-@folha_pagamento_bp.route('/folhas_pagamento')
+@folha_pagamento_bp.route('/folhas-pagamento')
 def listar():
     folhas = FolhaPagamento.query.all()
-    return render_template('folha_pagamento/listar.html', folhas=folhas)
+    config = {
+        'title': 'Lista de Folhas de Pagamento',
+        'registros': folhas,
+        'novo_registro_url': url_for('folha_pagamento.cadastrar'),
+        'novo_registro_texto': 'Nova Folha de Pagamento',
+        'editar_url': url_for('folha_pagamento.editar', id=0)[:-1] + '%s',
+        'excluir_url': url_for('folha_pagamento.excluir', id=0)[:-1] + '%s',
+        'mensagem_confirmacao': 'Tem certeza que deseja excluir esta folha de pagamento?',
+        'mensagem_lista_vazia': 'Nenhuma folha de pagamento cadastrada ainda.',
+        'colunas': [
+            {'campo': 'mes_referencia', 'label': 'Mês/Ano'},
+            {'campo': 'data_pagamento', 'label': 'Data de Pagamento', 'formato': 'data'},
+            {'campo': 'salario_bruto', 'label': 'Salário Bruto', 'formato': 'moeda'},
+            {'campo': 'descontos', 'label': 'Descontos', 'formato': 'moeda'},
+            {'campo': 'beneficios', 'label': 'Benefícios', 'formato': 'moeda'},
+            {'campo': 'salario_liquido', 'label': 'Salário Líquido', 'formato': 'moeda'},
+            {
+                'campo': 'pessoas',
+                'label': 'Funcionários',
+                'formato': 'custom',
+                'custom_value': lambda obj: len(obj.pessoas)
+            }
+        ],
+        'acoes': True
+    }
+    return render_template('components/generic_list.html', **config)
 
 
 # Rota para adicionar uma nova folha de pagamento
@@ -64,7 +88,7 @@ def editar(id):
 
 # Rota para deletar uma folha de pagamento
 @folha_pagamento_bp.route('/folhas_pagamento/deletar/<int:id>', methods=['POST'])
-def deletar(id):
+def excluir(id):
     folha = FolhaPagamento.query.get_or_404(id)
     db.session.delete(folha)
     db.session.commit()

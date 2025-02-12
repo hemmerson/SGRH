@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar ' + titulo if registro else 'Cadastrar ' + titulo }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ 'Editar ' + titulo if registro else 'Cadastrar ' + titulo }}</h2>
+    <form method="POST" {% if form_action %}action="{{ form_action }}"{% endif %}>
+        {% for campo in campos %}
+            {% if campo.tipo == 'text' or campo.tipo == 'email' or campo.tipo == 'date' or campo.tipo == 'number' %}
+                <div class="mb-3">
+                    <label for="{{ campo.nome }}" class="form-label">{{ campo.label }}</label>
+                    <input type="{{ campo.tipo }}"
+                           class="form-control {% if campo.classes %}{{ campo.classes }}{% endif %}"
+                           id="{{ campo.nome }}"
+                           name="{{ campo.nome }}"
+                           {% if campo.required %}required{% endif %}
+                           {% if campo.min %}min="{{ campo.min }}"{% endif %}
+                           {% if campo.max %}max="{{ campo.max }}"{% endif %}
+                           {% if campo.step %}step="{{ campo.step }}"{% endif %}
+                           value="{{ registro[campo.nome] if registro else campo.valor_padrao|default('') }}">
+                    {% if campo.help_text %}
+                        <div class="form-text">{{ campo.help_text }}</div>
+                    {% endif %}
+                </div>
+
+            {% elif campo.tipo == 'textarea' %}
+                <div class="mb-3">
+                    <label for="{{ campo.nome }}" class="form-label">{{ campo.label }}</label>
+                    <textarea class="form-control {% if campo.classes %}{{ campo.classes }}{% endif %}"
+                             id="{{ campo.nome }}"
+                             name="{{ campo.nome }}"
+                             {% if campo.required %}required{% endif %}
+                             {% if campo.rows %}rows="{{ campo.rows }}"{% endif %}>{{ registro[campo.nome] if registro else campo.valor_padrao|default('') }}</textarea>
+                    {% if campo.help_text %}
+                        <div class="form-text">{{ campo.help_text }}</div>
+                    {% endif %}
+                </div>
+
+            {% elif campo.tipo == 'select' %}
+                <div class="mb-3">
+                    <label for="{{ campo.nome }}" class="form-label">{{ campo.label }}</label>
+                    <select class="form-select {% if campo.classes %}{{ campo.classes }}{% endif %}"
+                            id="{{ campo.nome }}"
+                            name="{{ campo.nome }}"
+                            {% if campo.required %}required{% endif %}>
+                        {% if not campo.required %}
+                            <option value="">Selecione...</option>
+                        {% endif %}
+                        {% for opcao in campo.opcoes %}
+                            <option value="{{ opcao.value }}"
+                                    {% if registro and registro[campo.nome] == opcao.value %}selected{% endif %}>
+                                {{ opcao.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if campo.help_text %}
+                        <div class="form-text">{{ campo.help_text }}</div>
+                    {% endif %}
+                </div>
+
+            {% elif campo.tipo == 'checkbox' %}
+                <div class="form-check mb-3">
+                    <input type="checkbox"
+                           class="form-check-input {% if campo.classes %}{{ campo.classes }}{% endif %}"
+                           id="{{ campo.nome }}"
+                           name="{{ campo.nome }}"
+                           {% if registro and registro[campo.nome] %}checked{% endif %}
+                           {% if campo.valor_padrao %}checked{% endif %}>
+                    <label for="{{ campo.nome }}" class="form-check-label">{{ campo.label }}</label>
+                    {% if campo.help_text %}
+                        <div class="form-text">{{ campo.help_text }}</div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-success">{{ botao_salvar|default('Salvar') }}</button>
+            <a href="{{ voltar_url }}" class="btn btn-secondary">{{ botao_cancelar|default('Cancelar') }}</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

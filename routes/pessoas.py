@@ -3,10 +3,34 @@ from app import db
 from models.models import Pessoa, Profissao
 from routes import bp_pessoa
 
-@bp_pessoa.route('/')
+@bp_pessoa.route('/pessoas')
 def listar():
     pessoas = Pessoa.query.all()
-    return render_template('pessoa/listar.html', pessoas=pessoas)
+    config = {
+        'title': 'Lista de Pessoas',
+        'registros': pessoas,
+        'novo_registro_url': url_for('pessoas.cadastrar'),
+        'novo_registro_texto': 'Nova Pessoa',
+        'editar_url': url_for('pessoas.editar', id=0)[:-1] + '%s',
+        'excluir_url': url_for('pessoas.excluir', id=0)[:-1] + '%s',
+        'mensagem_confirmacao': 'Tem certeza que deseja excluir esta pessoa?',
+        'mensagem_lista_vazia': 'Nenhuma pessoa cadastrada ainda.',
+        'colunas': [
+            {'campo': 'nome', 'label': 'Nome'},
+            {'campo': 'data_nascimento', 'label': 'Data de Nascimento', 'formato': 'data'},
+            {'campo': 'telefone', 'label': 'Telefone'},
+            {'campo': 'email', 'label': 'E-mail'},
+            {'campo': 'data_admissao', 'label': 'Data de Admissão', 'formato': 'data'},
+            {
+                'campo': 'profissao',
+                'label': 'Cargo',
+                'formato': 'relacionamento',
+                'campo_relacionamento': 'nome_cargo'
+            }
+        ],
+        'acoes': True
+    }
+    return render_template('components/generic_list.html', **config)
 
 @bp_pessoa.route('/cadastrar', methods=['GET', 'POST'])
 def cadastrar():
