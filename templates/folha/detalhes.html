@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white text-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cash-stack"></i> Folha de Pagamento - {{ folha.mes_referencia }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Data de Pagamento:</strong> {{ folha.data_pagamento.strftime('%d/%m/%Y') }}</p>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <a href="{{ url_for('folha_pagamento.adicionar_pessoa', folha_id=folha.id) }}" class="btn btn-success">
+                            <i class="bi bi-person-plus"></i> Adicionar Pessoa
+                        </a>
+                        <a href="{{ url_for('folha_pagamento.listar_folhas') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Voltar
+                        </a>
+                    </div>
+
+                    <h4 class="mb-3">Pessoas na Folha</h4>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Salário Base</th>
+                                    <th>Descontos</th>
+                                    <th>Benefícios</th>
+                                    <th>Salário Líquido</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in folha.folhas_pagamento_pessoa %}
+                                <tr>
+                                    <td>{{ item.pessoa.nome }}</td>
+                                    <td>R$ {{ item.salario_base }}</td>
+                                    <td>R$ {{ item.descontos }}</td>
+                                    <td>R$ {{ item.beneficios }}</td>
+                                    <td class="fw-bold text-success">R$ {{ item.salario_liquido }}</td>
+                                    <td>
+                                        <form
+                                                method="POST"
+                                                action="{{ url_for('folha_pagamento.remover_pessoa', folha_id=folha.id, pessoa_id=item.pessoa.id) }}"
+                                                onsubmit="return confirm('Tem certeza que deseja excluir este registro?');"
+                                        >
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="bi bi-trash"></i> Remover
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer bg-info">
+                    <!-- Total da Folha FIXO -->
+                    <div class="text-center fw-bold fs-5">
+                        <i class="bi bi-calculator"></i> Total da Folha: R$ {{ folha.calcular_total_salarios_liquidos() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

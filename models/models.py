@@ -1,15 +1,33 @@
 import re
+from datetime import datetime
+from decimal import Decimal
 
 from sqlalchemy.orm import validates
-
 from db import db
 
-# Tabela de associação para o relacionamento N-N entre Pessoa e FolhaPagamento
-pessoa_folha_pagamento = db.Table('pessoa_folha_pagamento',
-                                  db.Column('pessoa_id', db.Integer, db.ForeignKey('pessoa.id'), primary_key=True),
-                                  db.Column('folha_pagamento_id', db.Integer, db.ForeignKey('folha_pagamento.id'),
-                                            primary_key=True)
-                                  )
+# Tabela intermediária para associar pessoas a uma folha de pagamento
+class PessoaFolhaPagamento(db.Model):
+    __tablename__ = 'pessoa_folha_pagamento'
+
+    id = db.Column(db.Integer, primary_key=True)
+    pessoa_id = db.Column(db.Integer, db.ForeignKey('pessoa.id'), nullable=False)
+    folha_pagamento_id = db.Column(db.Integer, db.ForeignKey('folha_pagamento.id'), nullable=False)
+    salario_base = db.Column(db.Numeric(10, 2), nullable=False)
+    descontos = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
+    beneficios = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
+    salario_liquido = db.Column(db.Numeric(10, 2), nullable=False)
+
+    pessoa = db.relationship('Pessoa', backref='folhas_pagamento_pessoa')
+    folha_pagamento = db.relationship('FolhaPagamento', backref='folhas_pagamento_pessoa')
+
+    def __repr__(self):
+        return f'<PessoaFolhaPagamento {self.pessoa.nome} - {self.folha_pagamento.mes_referencia}>'
+
+    @validates('salario_liquido')
+    def validate_salario_liquido(self, key, value):
+        if value != (self.salario_base + Decimal(self.beneficios) - Decimal(self.descontos)):
+            raise ValueError("Salário líquido não corresponde ao cálculo correto.")
+        return value
 
 
 class Pessoa(db.Model):
@@ -30,13 +48,9 @@ class Pessoa(db.Model):
     # Relacionamento para Capacitação (um-para-muitos)
     capacitacoes = db.relationship('Capacitacao', backref='pessoa', lazy=True)
 
-    # Relacionamento para Folha de Pagamento (muitos-para-muitos)
-    folhas_pagamento = db.relationship('FolhaPagamento',
-                                       secondary=pessoa_folha_pagamento,
-                                       backref=db.backref('pessoas'))
-
     def __repr__(self):
         return f'<Pessoa {self.nome}>'
+
 
 class Departamento(db.Model):
     __tablename__ = 'departamento'
@@ -66,10 +80,6 @@ class FolhaPagamento(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     data_pagamento = db.Column(db.Date, nullable=False)
-    salario_bruto = db.Column(db.Numeric(10, 2), nullable=False)
-    descontos = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
-    beneficios = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
-    salario_liquido = db.Column(db.Numeric(10, 2), nullable=False)
     mes_referencia = db.Column(db.String(7), nullable=False)
 
     def __repr__(self):
@@ -77,10 +87,12 @@ class FolhaPagamento(db.Model):
 
     @validates('mes_referencia')
     def validate_mes_referencia(self, key, value):
-        # Validação do formato MM/YYYY
         if not re.match(r'^\d{2}/\d{4}$', value):
             raise ValueError("Formato inválido para mês de referência. Use MM/YYYY")
         return value
+
+    def calcular_total_salarios_liquidos(self):
+        return sum(item.salario_liquido for item in self.folhas_pagamento_pessoa)
 
 
 class Capacitacao(db.Model):
