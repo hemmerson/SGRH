@@ -93,13 +93,13 @@
                 <div class="collapse" id="pessoasSubmenu">
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('pessoas.cadastrar') }}">
+                            <a class="nav-link" href="{{ url_for('pessoa.cadastrar') }}">
                                 <i class="bi bi-plus-circle"></i>
                                 <span class="menu-text">Cadastrar</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('pessoas.listar') }}">
+                            <a class="nav-link" href="{{ url_for('pessoa.listar') }}">
                                 <i class="bi bi-list"></i>
                                 <span class="menu-text">Listar</span>
                             </a>
@@ -165,7 +165,7 @@
                         aria-expanded="false">
                     <i class="bi bi-person-circle"></i>
                     {% if current_user.is_authenticated %}
-                            {{ current_user.nome }}
+                            {{ current_user.nome.upper() }}
                         {% else %}
                             Usuário
                         {% endif %}

@@ -64,9 +64,6 @@ def login():
 
         # Obter próxima página (se existir)
         next_page = request.args.get('next') or request.form.get('next')
-        print(request.args.get('next'))
-        print(request.form.get('next'))
-        print(next_page)
         if not next_page or not next_page.startswith('/'):
             next_page = url_for('dashboard')
 

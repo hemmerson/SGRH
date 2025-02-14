@@ -2,7 +2,7 @@ from flask import Blueprint
 
 # Cria os blueprints
 auth_bp = Blueprint('auth', __name__)
-bp_pessoa = Blueprint('pessoas', __name__)
+bp_pessoa = Blueprint('pessoa', __name__)
 profissao_bp = Blueprint('profissao', __name__)
 capacitacao_bp = Blueprint('capacitacao', __name__)
 departamento_bp = Blueprint('departamento', __name__)

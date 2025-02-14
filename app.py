@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template
-from flask_login import LoginManager
+from flask_login import LoginManager, login_required
 
 from db import db
 from models.models import Pessoa, Profissao, Capacitacao, FolhaPagamento, Departamento, Usuario
@@ -36,8 +36,8 @@ def create_app():
         app.register_blueprint(bp)
 
     # Rotas principais
-    @app.route('/')
     @app.route('/dashboard')
+    @login_required
     def dashboard():
         stats = {
             'total_departamentos': Departamento.query.count(),
