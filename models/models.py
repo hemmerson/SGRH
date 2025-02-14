@@ -1,8 +1,10 @@
 import re
-from datetime import datetime
+from flask_login import UserMixin
 from decimal import Decimal
 
 from sqlalchemy.orm import validates
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from db import db
 
 # Tabela intermediária para associar pessoas a uma folha de pagamento
@@ -119,12 +121,22 @@ class Capacitacao(db.Model):
         return data_fim
 
 
-class Usuario(db.Model):
+class Usuario(db.Model, UserMixin):
     __tablename__ = 'usuario'
 
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(30), nullable=False, unique=True)
-    senha = db.Column(db.String(), nullable=False)
+    email = db.Column(db.String(100), nullable=False, unique=True)
+    senha = db.Column(db.String(255), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+
+    def __init__(self, nome, email, senha):
+        self.nome = nome
+        self.email = email
+        self.senha = generate_password_hash(senha)
+
+    def check_password(self, senha):
+        return check_password_hash(self.senha, senha)
 
     def __repr__(self):
         return f'<Usuario {self.nome}>'

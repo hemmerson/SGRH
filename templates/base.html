@@ -164,18 +164,18 @@
                 <button class="btn btn-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown"
                         aria-expanded="false">
                     <i class="bi bi-person-circle"></i>
-                    {#{% if current_user.is_authenticated %}
-                            {{ current_user.username }}
+                    {% if current_user.is_authenticated %}
+                            {{ current_user.nome }}
                         {% else %}
                             Usuário
-                        {% endif %}#}
+                        {% endif %}
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Perfil</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}"><i class="bi bi-person"></i> Perfil</a></li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>
-                    <li><a class="dropdown-item" href="{#{{ url_for('auth.logout') }}#}">
+                    <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
                         <i class="bi bi-box-arrow-right"></i> Sair
                     </a></li>
                 </ul>

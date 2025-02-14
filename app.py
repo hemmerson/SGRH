@@ -1,7 +1,9 @@
 import os
 from flask import Flask, render_template
+from flask_login import LoginManager
+
 from db import db
-from models.models import Pessoa, Profissao, Capacitacao, FolhaPagamento, Departamento
+from models.models import Pessoa, Profissao, Capacitacao, FolhaPagamento, Departamento, Usuario
 from routes import blueprints
 
 
@@ -16,6 +18,18 @@ def create_app():
 
     # Inicialização
     db.init_app(app)
+
+    # Configurar Flask-Login
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Por favor, faça login para acessar esta página.'
+    login_manager.login_message_category = 'info'
+
+    # User loader function
+    @login_manager.user_loader
+    def load_user(user_id):
+        return Usuario.query.get(int(user_id))
 
     # Registro de blueprints
     for bp in blueprints:
