@@ -38,7 +38,7 @@ def is_valid_password(password):
 def login():
     # Redirecionar se já estiver logado
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
         username = request.form.get('username')
@@ -63,14 +63,18 @@ def login():
         login_user(user, remember=remember)
 
         # Obter próxima página (se existir)
-        next_page = request.args.get('next')
+        next_page = request.args.get('next') or request.form.get('next')
+        print(request.args.get('next'))
+        print(request.form.get('next'))
+        print(next_page)
         if not next_page or not next_page.startswith('/'):
             next_page = url_for('dashboard')
 
         flash(f'Bem-vindo, {user.nome}!', 'success')
         return redirect(next_page)
 
-    return render_template('auth/login.html')
+    next_page = request.args.get('next')
+    return render_template('auth/login.html', next=next_page)
 
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
